@@ -19,5 +19,7 @@ Aucune base de données n'est nécessaire, l'ensemble des enregistrements est co
 
 ## Utilisation
 
-- Rendez-vous sur la page d'accueil pour remplir le formulaire et signer.
+- Depuis la page d'accueil choisissez **Entrée** ou **Sortie**.
+- Le formulaire d'entrée permet de saisir vos informations et de signer.
+- La page de sortie liste les entrées du jour pour enregistrer l'heure de départ.
 - Une interface d'administration est disponible sur `/admin` pour exporter le registre de la semaine au format PDF.
