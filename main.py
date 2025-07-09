@@ -64,20 +64,22 @@ def export_pdf():
         if start <= ts < end:
             entries.append({**e, "timestamp": ts})
 
-    pdf = FPDF()
+    pdf = FPDF(orientation="L")
     pdf.add_page()
 
-    pdf.set_font('helvetica', 'B', 12)
+    pdf.set_font("helvetica", "B", 12)
     pdf.cell(0, 10,
              f"Registre de la semaine du {start.date()} au {end.date()}",
-             new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+             ln=1, align="C")
 
 
     headers = ["Date", "Nom", "Prénom", "Entreprise", "Motif", "Hôte", "Signature"]
     widths = [30, 30, 30, 40, 40, 30, 40]
+    table_width = sum(widths)
 
-    pdf.set_font('helvetica', 'B', 10)
-
+    pdf.set_font("helvetica", "B", 10)
+    x_start = (pdf.w - table_width) / 2
+    pdf.set_x(x_start)
     for h, w in zip(headers, widths):
         pdf.cell(w, 10, h, border=1, align="C")
     pdf.ln()
@@ -93,6 +95,7 @@ def export_pdf():
             e.get('host', '')
         ]
         row_height = 20
+        pdf.set_x(x_start)
         for v, w in zip(values, widths[:-1]):
             pdf.cell(w, row_height, str(v), border=1)
         sig_x = pdf.get_x()
@@ -102,7 +105,8 @@ def export_pdf():
             try:
                 b64 = e['signature'].split(',')[1] if ',' in e['signature'] else e['signature']
                 img_data = base64.b64decode(b64)
-                pdf.image(io.BytesIO(img_data), x=sig_x+2, y=sig_y+2, w=widths[-1]-4, h=row_height-4)
+                pdf.image(io.BytesIO(img_data), x=sig_x+2, y=sig_y+2,
+                          w=widths[-1]-4, h=row_height-4, type="PNG")
             except Exception:
                 pass
         pdf.ln()
