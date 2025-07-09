@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Registre de Passage</title>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        canvas { border: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <h1>Registre de Passage</h1>
+    <form method="post" action="/submit" onsubmit="prepareSignature()">
+        <label>Prénom: <input type="text" name="first_name" required></label><br>
+        <label>Nom: <input type="text" name="last_name" required></label><br>
+        <label>Entreprise: <input type="text" name="company"></label><br>
+        <label>Motif de la visite: <input type="text" name="reason" required></label><br>
+        <label>Personne visitée: <input type="text" name="host" required></label><br>
+        <p>Signature:</p>
+        <canvas id="sig" width="300" height="150"></canvas><br>
+        <button type="button" onclick="signaturePad.clear()">Effacer</button>
+        <input type="hidden" name="signature" id="signature">
+        <br><br>
+        <button type="submit">Valider</button>
+    </form>
+    <p><a href="/export" target="_blank">Exporter la semaine en PDF</a></p>
+
+<script>
+var canvas = document.getElementById('sig');
+var signaturePad = new SignaturePad(canvas);
+function prepareSignature() {
+    if (!signaturePad.isEmpty()) {
+        document.getElementById('signature').value = signaturePad.toDataURL();
+    }
+}
+</script>
+</body>
+</html>
