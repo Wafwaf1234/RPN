@@ -3,6 +3,7 @@ import io
 
 from flask import Flask, render_template, request, redirect, send_file
 import json
+import base64
 from fpdf import FPDF
 
 from fpdf.enums import XPos, YPos
@@ -67,16 +68,18 @@ def export_pdf():
     pdf.add_page()
 
     pdf.set_font('helvetica', 'B', 12)
-    pdf.cell(0, 10, f"Registre de la semaine du {start.date()} au {end.date()}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 10,
+             f"Registre de la semaine du {start.date()} au {end.date()}",
+             new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
 
 
-    headers = ["Date", "Nom", "Prénom", "Entreprise", "Motif", "Hôte"]
-    widths = [30, 30, 30, 40, 40, 30]
+    headers = ["Date", "Nom", "Prénom", "Entreprise", "Motif", "Hôte", "Signature"]
+    widths = [30, 30, 30, 40, 40, 30, 40]
 
     pdf.set_font('helvetica', 'B', 10)
 
     for h, w in zip(headers, widths):
-        pdf.cell(w, 10, h, border=1)
+        pdf.cell(w, 10, h, border=1, align="C")
     pdf.ln()
 
     pdf.set_font('helvetica', '', 9)
@@ -89,8 +92,19 @@ def export_pdf():
             e.get('reason', ''),
             e.get('host', '')
         ]
-        for v, w in zip(values, widths):
-            pdf.cell(w, 10, str(v), border=1)
+        row_height = 20
+        for v, w in zip(values, widths[:-1]):
+            pdf.cell(w, row_height, str(v), border=1)
+        sig_x = pdf.get_x()
+        sig_y = pdf.get_y()
+        pdf.cell(widths[-1], row_height, "", border=1)
+        if e.get('signature'):
+            try:
+                b64 = e['signature'].split(',')[1] if ',' in e['signature'] else e['signature']
+                img_data = base64.b64decode(b64)
+                pdf.image(io.BytesIO(img_data), x=sig_x+2, y=sig_y+2, w=widths[-1]-4, h=row_height-4)
+            except Exception:
+                pass
         pdf.ln()
 
 
