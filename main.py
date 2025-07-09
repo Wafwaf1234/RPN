@@ -80,6 +80,7 @@ def submit():
         "timestamp": datetime.utcnow().isoformat(),
         "first_name": request.form.get("first_name"),
         "last_name": request.form.get("last_name"),
+        "phone": request.form.get("phone"),
         "company": request.form.get("company"),
         "reason": request.form.get("reason"),
         "host": request.form.get("host"),
@@ -112,10 +113,10 @@ def export_pdf():
 
 
     headers = [
-        "Date", "Nom", "Prénom", "Entreprise",
-        "Motif", "Hôte", "Signature", "Sortie"
+        "Entrée", "Sortie", "Nom", "Prénom", "Tél.",
+        "Entreprise", "Motif", "Hôte", "Signature"
     ]
-    widths = [30, 30, 30, 40, 40, 30, 40, 30]
+    widths = [25, 25, 25, 25, 30, 40, 40, 25, 35]
     table_width = sum(widths)
 
     pdf.set_font("helvetica", "B", 10)
@@ -127,29 +128,7 @@ def export_pdf():
 
     pdf.set_font('helvetica', '', 9)
     for e in entries:
-        values = [
-            e['timestamp'].strftime('%Y-%m-%d %H:%M'),
-            e['last_name'],
-            e['first_name'],
-            e.get('company', ''),
-            e.get('reason', ''),
-            e.get('host', '')
-        ]
-        row_height = 20
-        pdf.set_x(x_start)
-        for v, w in zip(values, widths[:6]):
-            pdf.cell(w, row_height, str(v), border=1)
-        sig_x = pdf.get_x()
-        sig_y = pdf.get_y()
-        pdf.cell(widths[6], row_height, "", border=1)
-        if e.get('signature'):
-            try:
-                b64 = e['signature'].split(',')[1] if ',' in e['signature'] else e['signature']
-                img_data = base64.b64decode(b64)
-                pdf.image(io.BytesIO(img_data), x=sig_x+2, y=sig_y+2,
-                          w=widths[6]-4, h=row_height-4, type="PNG")
-            except Exception:
-                pass
+        entry_str = e['timestamp'].strftime('%Y-%m-%d %H:%M')
         exit_str = ""
         if e.get('exit_timestamp'):
             try:
@@ -157,7 +136,32 @@ def export_pdf():
                 exit_str = exit_dt.strftime('%Y-%m-%d %H:%M')
             except Exception:
                 exit_str = str(e['exit_timestamp'])
-        pdf.cell(widths[7], row_height, exit_str, border=1)
+
+        values = [
+            entry_str,
+            exit_str,
+            e['last_name'],
+            e['first_name'],
+            e.get('phone', ''),
+            e.get('company', ''),
+            e.get('reason', ''),
+            e.get('host', '')
+        ]
+        row_height = 20
+        pdf.set_x(x_start)
+        for v, w in zip(values, widths[:8]):
+            pdf.cell(w, row_height, str(v), border=1)
+        sig_x = pdf.get_x()
+        sig_y = pdf.get_y()
+        pdf.cell(widths[8], row_height, "", border=1)
+        if e.get('signature'):
+            try:
+                b64 = e['signature'].split(',')[1] if ',' in e['signature'] else e['signature']
+                img_data = base64.b64decode(b64)
+                pdf.image(io.BytesIO(img_data), x=sig_x+2, y=sig_y+2,
+                          w=widths[8]-4, h=row_height-4, type="PNG")
+            except Exception:
+                pass
         pdf.ln()
 
 
