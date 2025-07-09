@@ -5,6 +5,8 @@ from flask import Flask, render_template, request, redirect, send_file
 import json
 from fpdf import FPDF
 
+from fpdf.enums import XPos, YPos
+
 app = Flask(__name__)
 DATA_FILE = "visitors.json"
 
@@ -26,6 +28,12 @@ def start_of_week(dt: date) -> datetime:
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -57,18 +65,21 @@ def export_pdf():
 
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font('Arial', 'B', 12)
-    pdf.cell(0, 10, f"Registre de la semaine du {start.date()} au {end.date()}", ln=True)
+
+    pdf.set_font('helvetica', 'B', 12)
+    pdf.cell(0, 10, f"Registre de la semaine du {start.date()} au {end.date()}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
 
     headers = ["Date", "Nom", "Prénom", "Entreprise", "Motif", "Hôte"]
     widths = [30, 30, 30, 40, 40, 30]
 
-    pdf.set_font('Arial', 'B', 10)
+    pdf.set_font('helvetica', 'B', 10)
+
     for h, w in zip(headers, widths):
         pdf.cell(w, 10, h, border=1)
     pdf.ln()
 
-    pdf.set_font('Arial', '', 9)
+    pdf.set_font('helvetica', '', 9)
     for e in entries:
         values = [
             e['timestamp'].strftime('%Y-%m-%d %H:%M'),
@@ -82,7 +93,9 @@ def export_pdf():
             pdf.cell(w, 10, str(v), border=1)
         pdf.ln()
 
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
+
+    pdf_bytes = pdf.output(dest='S')
+
     return send_file(io.BytesIO(pdf_bytes), download_name='registre.pdf', mimetype='application/pdf')
 
 if __name__ == '__main__':

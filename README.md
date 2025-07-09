@@ -20,4 +20,4 @@ Aucune base de données n'est nécessaire, l'ensemble des enregistrements est co
 ## Utilisation
 
 - Rendez-vous sur la page d'accueil pour remplir le formulaire et signer.
-- La page `/export` permet de télécharger le registre de la semaine courante au format PDF.
+- Une interface d'administration est disponible sur `/admin` pour exporter le registre de la semaine au format PDF.
