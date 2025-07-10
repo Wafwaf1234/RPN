@@ -16,7 +16,9 @@
     <table>
         <thead>
             <tr>
-                <th>Entrée</th>
+                <th>Date d'arrivée</th>
+                <th>Heure d'arrivée</th>
+
                 <th>Sortie</th>
                 <th>Nom</th>
                 <th>Prénom</th>
@@ -28,8 +30,10 @@
         <tbody>
             {% for e in entries %}
             <tr>
-                <td>{{ e.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-                <td>{{ e.exit_timestamp.strftime('%Y-%m-%d %H:%M') if e.exit_timestamp else '' }}</td>
+
+                <td>{{ e.timestamp.strftime('%Y-%m-%d') }}</td>
+                <td>{{ e.timestamp.strftime('%H:%M') }}</td>
+                <td>{{ e.exit_timestamp.strftime('%H:%M') if e.exit_timestamp else '' }}</td>
                 <td>{{ e.last_name }}</td>
                 <td>{{ e.first_name }}</td>
                 <td>{{ e.company }}</td>
@@ -37,7 +41,8 @@
                 <td>{{ e.host }}</td>
             </tr>
            {% else %}
-            <tr><td colspan="7">Aucune entrée cette semaine.</td></tr>
+            <tr><td colspan="8">Aucune entrée cette semaine.</td></tr>
+
             {% endfor %}
         </tbody>
     </table>
