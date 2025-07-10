@@ -34,12 +34,30 @@ def get_weekly_entries() -> list:
     entries = []
     for e in raw_entries:
         ts = datetime.fromisoformat(e["timestamp"])
+        exit_ts = e.get("exit_timestamp")
+        if exit_ts:
+            exit_ts = datetime.fromisoformat(exit_ts)
         if start <= ts < end:
-            entries.append({**e, "timestamp": ts})
+            entries.append({**e, "timestamp": ts, "exit_timestamp": exit_ts})
     return entries
 
-@app.route('/', methods=['GET'])
-def index():
+def get_today_open_entries() -> list:
+    today = date.today()
+    entries = load_data()
+    open_entries = []
+    for idx, e in enumerate(entries):
+        ts = datetime.fromisoformat(e["timestamp"])
+        if ts.date() == today and not e.get("exit_timestamp"):
+            open_entries.append((idx, e))
+    return open_entries
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+
+@app.route('/entry')
+def entry_page():
     return render_template('index.html')
 
 
@@ -65,11 +83,12 @@ def submit():
         "company": request.form.get("company"),
         "reason": request.form.get("reason"),
         "host": request.form.get("host"),
-        "signature": request.form.get("signature")
+        "signature": request.form.get("signature"),
+        "exit_timestamp": None
     }
     entries.append(entry)
     save_data(entries)
-    return redirect('/')
+    return redirect('/thanks-entry')
 
 @app.route('/export')
 def export_pdf():
@@ -134,6 +153,30 @@ def export_pdf():
     pdf_bytes = pdf.output(dest='S')
 
     return send_file(io.BytesIO(pdf_bytes), download_name='registre.pdf', mimetype='application/pdf')
+
+
+@app.route('/exit', methods=['GET', 'POST'])
+def exit_page():
+    if request.method == 'POST':
+        entry_id = int(request.form.get('entry_id'))
+        entries = load_data()
+        if 0 <= entry_id < len(entries):
+            entries[entry_id]['exit_timestamp'] = datetime.now().isoformat()
+            save_data(entries)
+        return redirect('/thanks-exit')
+
+    open_entries = get_today_open_entries()
+    return render_template('exit.html', entries=open_entries)
+
+
+@app.route('/thanks-entry')
+def thanks_entry():
+    return render_template('message.html', message='Bonne visite')
+
+
+@app.route('/thanks-exit')
+def thanks_exit():
+    return render_template('message.html', message='Au revoir, bonne journée')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
