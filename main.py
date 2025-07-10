@@ -111,8 +111,17 @@ def export_pdf():
              ln=1, align="C")
 
 
-    headers = ["Date", "Nom", "Prénom", "Entreprise", "Motif", "Hôte", "Signature"]
-    widths = [30, 30, 30, 40, 40, 30, 40]
+    headers = [
+        "Entrée",
+        "Sortie",
+        "Nom",
+        "Prénom",
+        "Entreprise",
+        "Motif",
+        "Hôte",
+        "Signature",
+    ]
+    widths = [30, 30, 30, 30, 40, 40, 30, 40]
     table_width = sum(widths)
 
     pdf.set_font("helvetica", "B", 10)
@@ -124,8 +133,14 @@ def export_pdf():
 
     pdf.set_font('helvetica', '', 9)
     for e in entries:
+        exit_time = (
+            e['exit_timestamp'].strftime('%Y-%m-%d %H:%M')
+            if e.get('exit_timestamp')
+            else ''
+        )
         values = [
             e['timestamp'].strftime('%Y-%m-%d %H:%M'),
+            exit_time,
             e['last_name'],
             e['first_name'],
             e.get('company', ''),
