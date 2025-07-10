@@ -6,7 +6,6 @@ import json
 import base64
 from fpdf import FPDF
 
-from fpdf.enums import XPos, YPos
 
 app = Flask(__name__)
 DATA_FILE = "visitors.json"
@@ -60,7 +59,7 @@ def entries():
 def submit():
     entries = load_data()
     entry = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "first_name": request.form.get("first_name"),
         "last_name": request.form.get("last_name"),
         "company": request.form.get("company"),
