@@ -26,6 +26,19 @@ def start_of_week(dt: date) -> datetime:
     start = dt - timedelta(days=dt.weekday())
     return datetime.combine(start, datetime.min.time())
 
+def get_weekly_entries() -> list:
+    """Return all entries for the current week as dicts with parsed timestamps."""
+    today = date.today()
+    start = start_of_week(today)
+    end = start + timedelta(days=7)
+    raw_entries = load_data()
+    entries = []
+    for e in raw_entries:
+        ts = datetime.fromisoformat(e["timestamp"])
+        if start <= ts < end:
+            entries.append({**e, "timestamp": ts})
+    return entries
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
@@ -34,6 +47,13 @@ def index():
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
+
+
+@app.route('/entries')
+def entries():
+    """Display this week's entries in a simple table."""
+    data = get_weekly_entries()
+    return render_template('entries.html', entries=data)
 
 
 @app.route('/submit', methods=['POST'])
@@ -54,15 +74,15 @@ def submit():
 
 @app.route('/export')
 def export_pdf():
-    today = date.today()
-    start = start_of_week(today)
-    end = start + timedelta(days=7)
-    raw_entries = load_data()
-    entries = []
-    for e in raw_entries:
-        ts = datetime.fromisoformat(e["timestamp"])
-        if start <= ts < end:
-            entries.append({**e, "timestamp": ts})
+    entries = get_weekly_entries()
+    if not entries:
+        # No entries this week, still compute start and end for header
+        today = date.today()
+        start = start_of_week(today)
+        end = start + timedelta(days=7)
+    else:
+        start = start_of_week(entries[0]["timestamp"].date())
+        end = start + timedelta(days=7)
 
     pdf = FPDF(orientation="L")
     pdf.add_page()
