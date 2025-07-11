@@ -143,7 +143,6 @@ def export_pdf():
             else ''
         )
         values = [
-
             e['timestamp'].strftime('%Y-%m-%d'),
             e['timestamp'].strftime('%H:%M'),
 
