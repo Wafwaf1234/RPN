@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Sortie</title>
+    <meta name="viewport" content="width=1024, initial-scale=1">
+    <style>
+        body {font-family: Arial, sans-serif; background:#f5f5f5; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;}
+        form {background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+        select, button {font-size:1.1em; padding:10px; margin-top:10px; width:100%;}
+    </style>
+</head>
+<body>
+<form method="post">
+    <h1>Qui sort ?</h1>
+    {% if entries %}
+    <select name="entry_id" required>
+        {% for idx, e in entries %}
+        <option value="{{ idx }}">{{ e.first_name }} {{ e.last_name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Valider</button>
+    {% else %}
+    <p>Aucun visiteur en cours.</p>
+    {% endif %}
+</form>
+</body>
+</html>
